@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>
+            TC Articles
+        </title>
+    </head>
+
+    <body>
+        <h1>Here is {{ dateStr }} techcrunch article</h1>
+
+        <!-- unordered list -->
+        <ul>
+            {% for article in article_list %}
+            <li> 
+                <a href={{ article['url'] }}>{{ article['title'] }}</a>
+                <!-- <button name="like_btn" type="button" 
+                    onclick="window.location.href='{{ url_for('like_techcrunch_article', title=article['title']) }}';">
+                    like
+                </button> -->
+                <form method="POST" action="/like_techcrunch_article">
+                    <input type="hidden" name="date" value="{{ dateStr }}" />
+                    <input type="hidden" name="title" value="{{ article['title'] }}" />
+                    <input type="submit" name="action" value="Like" />
+                    <input type="submit" name="action" value="Dislike" />
+
+                </form>                
+            </li>
+
+            <br>
+            {% endfor %}
+        </ul>
+    </body>
+</html>
