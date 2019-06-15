@@ -29,11 +29,25 @@ def hello_world():
 def display_techcrunch_articles(date):
     if date.lower() == 'today':
         date = datetime.today().strftime("%Y-%m-%d")
-    article_list = article_manager.retrieve_articles(date)
+    article_list = []
 
-    for article in article_list:
-        interest_form = ArticleInterestForm()
-        article['form'] = interest_form
+    print(request)
+    if request.method == 'POST':
+        article_list = json.loads(request.form.get('article_list').replace("\'", "\""))
+        title = request.form.get('title').lower().strip()
+        action = request.form.get('action').lower().strip()
+        date = request.form.get('date')
+        
+        #validate required fields present
+        if title and action:
+            article = {'title': title, 'date': date}
+            article_list = [item for item in article_list if item['title'].lower().strip() != title]
+            if action == 'like':
+                article_manager.record_liked_article(user_id='rui', article=article)
+            elif action == 'dislike':
+                article_manager.record_dislike_article(user_id='rui', article=article)
+    else:
+        article_list = article_manager.retrieve_articles(date)
 
     return make_response(
         render_template(
@@ -43,22 +57,6 @@ def display_techcrunch_articles(date):
             ), 
         200, headers)
 
-@app.route('/like_techcrunch_article', methods=['POST'])
-def like_techcrunch_article():
-    title = request.form.get('title')
-    date = request.form.get('date')
-    action = request.form.get('action')
-    print(title)
-    print(date)
-    print(action)
-    article = {'title': title, 'date': date}
-
-    if action.lower() == 'like':
-        article_manager.record_liked_article(user_id='rui', article=article)
-    elif action.lower() == 'dislike':
-        article_manager.record_dislike_article(user_id='rui', article=article)
-    
-    return redirect(url_for('display_techcrunch_articles', date=date))
 
 class CrawlTCForm(FlaskForm):
     '''

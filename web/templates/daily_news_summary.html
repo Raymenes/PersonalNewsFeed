@@ -16,11 +16,12 @@
             <!-- unordered list -->
             <div>
                 {% for article in article_list %}
-                <div id="Article_"+{{ article['title'] }}> 
+                <div id="Article_{{ article['title'] }}""> 
                     <a href={{ article['url'] }} class="list-group-item list-group-item-primary" target="_blank" rel="noopener noreferrer">
                         {{ article['title'] }}
                     </a>
-                    <form method="POST" action="/like_techcrunch_article">
+                    <form method="POST" action="/Techcrunch/{{dateStr}}">
+                        <input type="hidden" name="article_list" value="{{ article_list }}" />
                         <input type="hidden" name="date" value="{{ dateStr }}" />
                         <input type="hidden" name="title" value="{{ article['title'] }}"/>
                         <input type="submit" name="action" value="Like" class="btn btn-success"/>

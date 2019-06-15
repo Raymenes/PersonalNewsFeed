@@ -273,6 +273,7 @@ class TCArticleManager:
     @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
 
+    print("user " + user_id + " liked " + article['title'])
     self.user_pref_db.record_preference(user_id, liked_article=article, dislike_article=None)
 
 
@@ -283,6 +284,7 @@ class TCArticleManager:
     @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
 
+    print("user " + user_id + " disliked " + article['title'])
     self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=article)
 
 
