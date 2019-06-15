@@ -5,7 +5,13 @@ import json
 import hashlib
 
 def getTitleHash(title):
-  return hashlib.sha256(title.encode()).hexdigest()
+  '''
+  Get the SHA hashed string for the given article title,
+  after removing leading and tailing whitespace and convert to lower case
+  @param title - title string
+  @return SHA hashed string 
+  '''
+  return hashlib.sha256(title.encode().strip().lower()).hexdigest()
 
 class ArticleDB:
   # Manager an datebase of full article data
@@ -20,8 +26,8 @@ class ArticleDB:
 
   def hasDateEntry(self, date):
     '''
-    @param date - a string for artcile publish date ("yyyy-mm-dd")
-    @return boolean - if the an entry for this date exists in the collection
+    @param date - artcile publish date string ("yyyy-mm-dd")
+    @return boolean - if this date entry is in the collection
     '''
     assert (isinstance(date, str)), "date is not a valid string or datetime object!"
 
@@ -31,11 +37,9 @@ class ArticleDB:
   
   def insertArticle(self, date, article):
     '''
-    @param date - a string for artcile publish date ("yyyy-mm-dd")
-    @param article - a dict representing the article with field:
-              "title" -> string
-              "text" -> string
-              "url" -> string
+    @param date - artcile publish date string ("yyyy-mm-dd")
+    @param list of articles 
+            -> {'title': string, 'text': string, 'date': 'yyyy-mm-dd', 'url': url}
     '''
     assert (isinstance(date, str)), "date is not a valid string or datetime object!"
 
@@ -43,11 +47,9 @@ class ArticleDB:
 
   def insertListOfArticles(self, date, article_list):
     '''
-    @param date - a string for artcile publish date ("yyyy-mm-dd")
-    @param article_list - a list of dict representing the articles with field:
-                          "title" -> string
-                          "text" -> string
-                          "url" -> string
+    @param date - artcile publish date string ("yyyy-mm-dd")
+    @param list of articles 
+            -> {'title': string, 'text': string, 'date': 'yyyy-mm-dd', 'url': url}
     '''
     assert (isinstance(date, str)), "date is not a valid string or datetime object!"
 
@@ -71,11 +73,9 @@ class ArticleDB:
 
   def getArticleListForDate(self, date):
     '''
-    @param date - a string for artcile publish date ("yyyy-mm-dd")
-    @return articles - list of dict representing the articles with field:
-                      "title" -> string
-                      "text" -> string
-                      "url" -> string
+    @param date - artcile publish date string ("yyyy-mm-dd")
+    @return list of articles 
+            -> {'title': string, 'text': string, 'date': 'yyyy-mm-dd', 'url': url}
     '''
     assert (isinstance(date, str)), "date is not a valid string!"
 
@@ -86,6 +86,11 @@ class ArticleDB:
       return []
 
   def getArticleByTitle(self, title, date=None):
+    '''
+    Get a full article object by its title
+    @param title - article title string
+    @return article - {'title': string, 'text': string, 'date': 'yyyy-mm-dd', 'url': url}
+    '''
     hashed_title = getTitleHash(title)
     
     if date != None:
@@ -103,17 +108,17 @@ class ArticlePreferenceDB:
 
   def __init__(self, collection):
     '''
-    collection - a mongo db collection to store user article preference
+    @param collection - a mongo db collection to store user article preference
     '''
     self.collection = collection
 
+
   def record_preference(self, user_id, liked_article, dislike_article):
     '''
-    record user liked article
-
-    @param liked_article - a dict representing the article metadata with field:
-    {'title'=string, 'url'=string, 'date'='yyyy/mm/dd'}
+    Record user liked article
+    @param liked_article - {'title'=string, 'url'=string, 'date'='yyyy/mm/dd'}
     '''
+
     if liked_article is None and dislike_article is None:
       return
     elif liked_article is None:
@@ -123,15 +128,14 @@ class ArticlePreferenceDB:
     else:
       self.record_preference_list(user_id, [liked_article], [dislike_article])
 
+
   def record_preference_list(self, user_id, liked_articles, dislike_articles):
     '''
-    record user liked articles
-
+    Record user liked articles
     @param liked_articles - a list of user liked articles
     @param dislike_articles - a list of user disliked articles
     article = {'title'=string, 'url'=string, 'date'='yyyy/mm/dd'}
     '''
-    
     user_preferences = self.get_user_preferences(user_id)
     like_article_dict = user_preferences['like']
     dislike_article_dict = user_preferences['dislike']
@@ -146,7 +150,13 @@ class ArticlePreferenceDB:
       {"$set": {'like': like_article_dict, 'dislike': dislike_article_dict}},
       upsert=True)
 
+
   def get_user_preferences(self, user_id):
+    '''
+    Get user article preferences
+    @ user_id - user id
+    @ return - {'like': {}, 'dislike': {}}
+    '''
     if self.collection.find({"uid": user_id}).count() == 0:
       empty_result = {}
       empty_result['like'] = {}
@@ -155,11 +165,25 @@ class ArticlePreferenceDB:
     else:
       return self.collection.find_one({'uid': user_id})
 
+
   def get_user_likes(self, user_id):
-    return self.get_user_preferences(user_id)['like']
+    '''
+    Return a list of user liked articles
+    @param user_id - user id
+    @return - list of articles -> {'title': string, 'date': 'yyyy-mm-dd'}
+    '''
+    likes_dict = self.get_user_preferences(user_id)['like']
+    return [article for key, article in likes_dict.items()]
+
 
   def get_user_dislikes(self, user_id):
-    return self.get_user_preferences(user_id)['dislike']
+    '''
+    Return a list of user disliked articles
+    @param user_id - user id
+    @return - list of articles -> {'title': string, 'date': 'yyyy-mm-dd'}
+    '''
+    dislikes_dict = self.get_user_preferences(user_id)['dislike']
+    return [article for key, article in dislikes_dict.items()]
 
 class TCArticleCrawler:
   
@@ -233,29 +257,58 @@ class TCArticleManager:
         article.pop("text", None)
 
     return article_list
+
+  def fetch_today_articles(self):
+    '''
+    @function - retrieve articles published today 
+    '''
+    return self.retrieve_articles(datetime.today().strftime('%Y-%m-%d'))
     
+
   def record_liked_article(self, user_id, article):
     '''
     Store the user liked article in database
+
+    @param user_id - user id
+    @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
-    print("user liked: " + article['title'])
+
     self.user_pref_db.record_preference(user_id, liked_article=article, dislike_article=None)
 
+
   def record_dislike_article(self, user_id, article):
-    print("user disliked: " + article['title'])
+    '''
+    Store the user disliked article in database
+    @param user_id - user id
+    @param article - {'title': string, 'date': 'yyyy-mm-dd'}
+    '''
+
     self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=article)
 
+
   def get_full_article(self, title, date=None):
+    '''
+    Get full article data
+    @param title - article title
+    '''
     return self.article_db.getArticleByTitle(title, date)
 
+
   def get_user_likes(self, user_id):
+    '''
+    Get list of user liked articles
+    @param user_id - user id
+    '''
     return self.user_pref_db.get_user_likes(user_id)
 
+
   def get_user_dislikes(self, user_id):
+    '''
+    Get list of user disliked articles
+    @param user_id - user id
+    '''
     return self.user_pref_db.get_user_dislikes(user_id)
-    
-  def fetch_today_articles(self):
-    return self.retrieve_articles(datetime.today().strftime('%Y-%m-%d'))
+
 
 
 ## this is for debugging

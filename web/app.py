@@ -12,14 +12,6 @@ import json
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "maomao is the best"
 
-# # Mongo db initialization
-# mongoClient = MongoClient("mongodb://localhost:27017/")
-# db = mongoClient["TC-Article"]
-# collection = db["techcrunch"]
-
-# # article helper class
-# article_db = ArticleDB(collection)
-# article_crawler = TCArticleCrawler()
 article_manager = TCArticleManager()
 
 headers = {'Content-Type': 'text/html'}
@@ -50,12 +42,6 @@ def display_techcrunch_articles(date):
             article_list=article_list
             ), 
         200, headers)
-
-# @app.context_processor
-# def utility_processor():
-#     def like_techcrunch_article(article):
-#             article_manager.record_liked_article(article)
-#     return dict(like_techcrunch_article=like_techcrunch_article)
 
 @app.route('/like_techcrunch_article', methods=['POST'])
 def like_techcrunch_article():
