@@ -4,6 +4,14 @@
 <div class="jumbotron">
     <h1 class="display-4">Here is {{ dateStr }} techcrunch article</h1>
     <br>
+
+    <nav class="nav nav-pills nav-fill">
+        <a class="flex-sm-right text-sm-left nav-link active" href="/Techcrunch/{{dateStr}}/prev">Prev Date</a>
+        <a class="nav-item nav-link disabled" href="/Techcrunch/{{dateStr}}/rand" tabindex="-1" aria-disabled="true">Random</a>
+        <a class="flex-sm-left text-sm-right nav-link active" href="/Techcrunch/{{dateStr}}/next">Next Date</a>
+    </nav>
+    <br>
+
     <!-- unordered list -->
     <div>
         {% for article in article_list %}

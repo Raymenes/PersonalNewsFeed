@@ -8,6 +8,7 @@ from article_manager import TCArticleCrawler, ArticleDB, TCArticleManager
 
 import subprocess
 import json
+from random import randint
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "maomao is the best"
@@ -25,10 +26,25 @@ def hello_world():
 
     return make_response(render_template('index.html', form=form), 200, headers)
 
+@app.route('/Techcrunch/<date>/<diff>', methods=['GET'])
 @app.route('/Techcrunch/<date>', methods=['GET','POST'])
-def display_techcrunch_articles(date):
+def display_techcrunch_articles(date, diff=None):
     if date.lower() == 'today':
         date = datetime.today().strftime("%Y-%m-%d")
+    
+    if diff:
+        dateObj = datetime.strptime(date, "%Y-%m-%d")
+        if diff.lower() == 'prev':
+            dateObj -= timedelta(days=1)
+        elif diff.lower() == 'next':
+            dateObj += timedelta(days=1)
+        elif diff.lower() == 'rand':
+            oldestDateObj = datetime.strptime("2018-01-01", "%Y-%m-%d")
+            todayObj = datetime.today()
+            delta = todayObj - oldestDateObj
+            dateObj = oldestDateObj + timedelta(days=randint(0, delta.days))
+        date = dateObj.strftime("%Y-%m-%d")
+    
     article_list = []
 
     if request.method == 'POST':
