@@ -62,6 +62,7 @@ def display_user_likes(uid):
         return "No user [{}] found".format(uid)
     else:
         like_article_list = article_manager.get_user_likes(uid)
+        like_article_list.sort(key=lambda article: article['date'])
         return make_response(
             render_template(
                 'user_preference.html',
@@ -77,6 +78,7 @@ def display_user_dislikes(uid):
         return "No user [{}] found".format(uid)
     else:
         dislike_article_list = article_manager.get_user_dislikes(uid)
+        dislike_article_list.sort(key=lambda article: article['date'])
         return make_response(
             render_template(
                 'user_preference.html',
