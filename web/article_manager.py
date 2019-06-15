@@ -141,9 +141,16 @@ class ArticlePreferenceDB:
     dislike_article_dict = user_preferences['dislike']
 
     for article in liked_articles:
-      like_article_dict[getTitleHash(article['title'])] = article
+      key = getTitleHash(article['title'])
+      if key in dislike_article_dict:
+        del dislike_article_dict[key]
+      like_article_dict[key] = article
     for article in dislike_articles:
-      dislike_article_dict[getTitleHash(article['title'])] = article
+      #make sure user doesn't have the same article like and dislike at the same time
+      key = getTitleHash(article['title'])
+      if key in like_article_dict:
+        del like_article_dict[key]
+      dislike_article_dict[key] = article
     
     self.collection.update_one(
       {'uid': user_id}, 
@@ -273,7 +280,7 @@ class TCArticleManager:
     @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
 
-    print("user " + user_id + " liked " + article['title'])
+    print("user [{}] liked [{}]".format(user_id, article['title']))
     self.user_pref_db.record_preference(user_id, liked_article=article, dislike_article=None)
 
 
@@ -284,7 +291,7 @@ class TCArticleManager:
     @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
 
-    print("user " + user_id + " disliked " + article['title'])
+    print("user [{}] disliked [{}]".format(user_id, article['title']))
     self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=article)
 
 

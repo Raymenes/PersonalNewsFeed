@@ -31,7 +31,6 @@ def display_techcrunch_articles(date):
         date = datetime.today().strftime("%Y-%m-%d")
     article_list = []
 
-    print(request)
     if request.method == 'POST':
         article_list = json.loads(request.form.get('article_list').replace("\'", "\""))
         title = request.form.get('title').lower().strip()
@@ -65,12 +64,9 @@ class CrawlTCForm(FlaskForm):
     date_field = StringField("Get articles from specific date(yyyy-mm-dd):")
     submit_field = SubmitField("Submit")
 
-class ArticleInterestForm(FlaskForm):
-    '''
-    form for user to select interested or not
-    '''
-    like_btn = SubmitField("Like")
-
+## to manually run mongodb on local host:
+## brew install mongodb
+## mongod --config /usr/local/etc/mongod.conf
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=4999, debug=True)
 
