@@ -113,6 +113,10 @@ class ArticlePreferenceDB:
     self.collection = collection
 
 
+  def has_user(self, user_id):
+    return self.collection.find({"uid": user_id}).count() != 0
+
+
   def record_preference(self, user_id, liked_article, dislike_article):
     '''
     Record user liked article
@@ -164,7 +168,7 @@ class ArticlePreferenceDB:
     @ user_id - user id
     @ return - {'like': {}, 'dislike': {}}
     '''
-    if self.collection.find({"uid": user_id}).count() == 0:
+    if not self.has_user(user_id):
       empty_result = {}
       empty_result['like'] = {}
       empty_result['dislike'] = {}
@@ -244,6 +248,7 @@ class TCArticleManager:
     self.article_crawler = TCArticleCrawler()
     return
 
+
   def retrieve_articles(self, date, full_content=False):
     '''
     @function - retrieve articles published on date, 
@@ -264,6 +269,7 @@ class TCArticleManager:
         article.pop("text", None)
 
     return article_list
+
 
   def fetch_today_articles(self):
     '''
@@ -293,6 +299,10 @@ class TCArticleManager:
 
     print("user [{}] disliked [{}]".format(user_id, article['title']))
     self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=article)
+
+
+  def has_user(self, user_id):
+    return self.user_pref_db.has_user(user_id)
 
 
   def get_full_article(self, title, date=None):

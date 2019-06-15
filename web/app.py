@@ -56,6 +56,39 @@ def display_techcrunch_articles(date):
             ), 
         200, headers)
 
+@app.route('/UserLikes/<uid>', methods=['GET','POST'])
+def display_user_likes(uid):
+    if not article_manager.has_user(uid):
+        return "No user [{}] found".format(uid)
+    else:
+        like_article_list = article_manager.get_user_likes(uid)
+        return make_response(
+            render_template(
+                'user_preference.html',
+                uid=uid,
+                pref_type="liked",
+                article_list=like_article_list
+                ), 
+            200, headers)
+
+@app.route('/UserDislikes/<uid>', methods=['GET','POST'])
+def display_user_dislikes(uid):
+    if not article_manager.has_user(uid):
+        return "No user [{}] found".format(uid)
+    else:
+        dislike_article_list = article_manager.get_user_dislikes(uid)
+        return make_response(
+            render_template(
+                'user_preference.html',
+                uid=uid,
+                pref_type="disliked",
+                article_list=dislike_article_list
+                ), 
+            200, headers)
+
+
+
+
 
 class CrawlTCForm(FlaskForm):
     '''
