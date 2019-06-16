@@ -31,6 +31,7 @@ def hello_world():
 def display_techcrunch_articles(date, diff=None):
     if date.lower() == 'today':
         date = datetime.today().strftime("%Y-%m-%d")
+        return redirect(url_for('display_techcrunch_articles', date=date, diff=diff))
     
     if diff:
         dateObj = datetime.strptime(date, "%Y-%m-%d")
@@ -44,6 +45,7 @@ def display_techcrunch_articles(date, diff=None):
             delta = todayObj - oldestDateObj
             dateObj = oldestDateObj + timedelta(days=randint(0, delta.days))
         date = dateObj.strftime("%Y-%m-%d")
+        return redirect(url_for('display_techcrunch_articles', date=date, diff=None))
     
     article_list = []
 
@@ -61,8 +63,27 @@ def display_techcrunch_articles(date, diff=None):
                 article_manager.record_liked_article(user_id='rui', article=article)
             elif action == 'dislike':
                 article_manager.record_dislike_article(user_id='rui', article=article)
+            elif action == 'uncertain':
+                article_manager.record_uncertain_article(user_id='rui', article=article)
     else:
         article_list = article_manager.retrieve_articles(date)
+
+    # add extra info if article has been labeled by user
+    uid = "rui"
+    if uid:
+        user_likes = set([article['title'] for article in article_manager.get_user_likes(uid)])
+        user_dislikes = set([article['title'] for article in article_manager.get_user_dislikes(uid)])
+        user_uncertains = set([article['title'] for article in article_manager.get_user_uncertains(uid)])
+
+        for article in article_list:
+            article['label'] = ''
+            title = article['title'].strip().lower()
+            if title in user_likes:
+                article['label'] = 'like'
+            elif title in user_dislikes:
+                article['label'] = 'dislike'
+            elif title in user_uncertains:
+                article['label'] = 'uncertain'
 
     return make_response(
         render_template(
@@ -72,19 +93,26 @@ def display_techcrunch_articles(date, diff=None):
             ), 
         200, headers)
 
-@app.route('/UserLikes/<uid>', methods=['GET','POST'])
-def display_user_likes(uid):
+@app.route('/User/<uid>/<prefType>', methods=['GET','POST'])
+def display_user_likes(uid, prefType):
     if not article_manager.has_user(uid):
         return "No user [{}] found".format(uid)
     else:
-        like_article_list = article_manager.get_user_likes(uid)
-        like_article_list.sort(key=lambda article: article['date'])
+        article_list = []
+        if prefType.lower() == 'like':
+            article_list = article_manager.get_user_likes(uid)
+        elif prefType.lower() == 'dislike':
+            article_list = article_manager.get_user_dislikes(uid)
+        elif prefType.lower() == 'uncertain':
+            article_list = article_manager.get_user_uncertains(uid)
+
+        article_list.sort(key=lambda article: article['date'])
         return make_response(
             render_template(
                 'user_preference.html',
                 uid=uid,
-                pref_type="liked",
-                article_list=like_article_list
+                pref_type=prefType,
+                article_list=article_list
                 ), 
             200, headers)
 
