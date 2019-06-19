@@ -20,6 +20,8 @@
             <a href={{ article['url'] }} class="list-group-item list-group-item-primary" target="_blank" rel="noopener noreferrer">
                 {{ article['title'] }}
             </a>
+
+            {% if session['uid'] %}
             <form method="POST" action="/Techcrunch/{{dateStr}}">
                 <input type="hidden" name="article_list" value="{{ article_list }}" />
                 <input type="hidden" name="date" value="{{ dateStr }}" />
@@ -39,7 +41,8 @@
                 {% else %}
                 <input type="submit" name="action" value="Uncertain" class="btn btn-warning"/>
                 {% endif %}
-            </form>                
+            </form>      
+            {% endif %}          
         </div>
 
         <br>

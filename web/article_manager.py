@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import pymongo
 import subprocess
 import json
@@ -214,7 +214,7 @@ class ArticlePreferenceDB:
 
 class TCArticleCrawler:
   
-  def __init__(self, save_path="./tcData"):
+  def __init__(self, save_path="/workspace/PersonalNewsFeed/web/tcData"):
     self.FILENAME_PREFIX = "techcrunch_"
     self.save_path = save_path
     return
@@ -226,7 +226,7 @@ class TCArticleCrawler:
                            published on the given date
     '''
     if (filename is None):
-      filename = self.save_path + '/' + self.FILENAME_PREFIX + specific_date + ".json"
+      filename = '/workspace/PersonalNewsFeed/web/tcData' + '/' + self.FILENAME_PREFIX + specific_date + ".json"
 
     # clear all content of this file, if exists
     with open(filename, "w") as f: f.close
@@ -265,7 +265,7 @@ class TCArticleManager:
     return
 
 
-  def retrieve_articles(self, date, full_content=False):
+  def retrieve_articles(self, date, full_content=False, ):
     '''
     @function - retrieve articles published on date, 
                 load from database if entry exist, 
@@ -381,27 +381,16 @@ class TCArticleManager:
 # official documentation: http://api.mongodb.com/python/current/tutorial.html
 # shell command: https://dzone.com/articles/top-10-most-common-commands-for-beginners
 if __name__ == '__main__':
-  mongoClient = pymongo.MongoClient("mongodb://localhost:27017/")
-  db = mongoClient["TC-Article"]
-  collection = db["techcrunch"]
+  article_manager = TCArticleManager()
+  dateObj = datetime.strptime('2018-01-01', "%Y-%m-%d")
+  todayObj = datetime.today()
 
-  date = "2019-06-08"
-  filename = "techcrunch_2019_06_08.json"
-  article_list = json.load(open(filename, 'r'))
+  article_dict = {}
 
-  # collection.insert({
-  #       "date": date,
-  #       "articles": article_list
-  #     })
-
-  article_manager = ArticleDB(collection)
-  print("has entry for: " + date + " = " + str(article_manager.hasDateEntry(date)))
-  if not article_manager.hasDateEntry(date):
-    print("now inserting ...")
-    article_manager.insertListOfArticles(date, article_list)
-
-  print("has entry for: " + date + " = " + str(collection.find({"date": date}).count()))
-  print("the articles for " + date + " is " + str(article_manager.getArticleListForDate(date)))
+  while dateObj <= todayObj:
+      dateStr = dateObj.strftime("%Y-%m-%d")
+      article_dict[dateStr] = article_manager.retrieve_articles(dateStr, full_content=True)
+      dateObj += timedelta(days=1)
 
   
   

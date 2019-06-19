@@ -22,29 +22,40 @@
           <a class="nav-link" href="/Techcrunch/today">Techcrunch-Today <span class="sr-only">(current)</span></a>
         </li>
         
+        {% if session['uid'] %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             My-Preference
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/User/rui/Like">Interested</a>
+            <a class="dropdown-item" href="/User/{{session['uid']}}/Like">Interested</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/User/rui/Dislike">Not Interested</a>
+            <a class="dropdown-item" href="/User/{{session['uid']}}/Dislike">Not Interested</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/User/rui/Uncertain">Uncertains</a>
+            <a class="dropdown-item" href="/User/{{session['uid']}}/Uncertain">Uncertains</a>
           </div>
         </li>
+        {% endif %}
       </ul>
 
-      <form class="form-inline">
+      <form class="form-inline" method="POST" action="/">
         <div class="input-group">
+          
+          {% if session['uid'] %}
+          <a class="nav-link disabled" tabindex="-1" aria-disabled="true">{{session['uid']}}@</a>
+          <input type="hidden" name="action" value="logout">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</button>
+          {% else %}
           <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon1">@</span>
+              <span class="input-group-text" id="basic-addon1">@</span>
           </div>
-          <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+          <input type="text" name="uid" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+          <input type="hidden" name="action" value="login">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Login</button>
+          {% endif %}
         </div>
       </form>
+      
 
     </div>
   </nav>

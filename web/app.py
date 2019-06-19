@@ -19,12 +19,23 @@ headers = {'Content-Type': 'text/html'}
 
 @app.route('/', methods=['GET','POST'])
 def hello_world():
+    # Handle get today tc articles button
     form = CrawlTCForm()
     if form.validate_on_submit():
         date = form.date_field.data
         return redirect(url_for('display_techcrunch_articles', date=date))
 
-    return make_response(render_template('index.html', form=form), 200, headers)
+    # Handle simple user login
+    if request.method == 'POST':
+        print(request)
+        print(request.form)
+        action = request.form.get('action')
+        if action.lower() == 'login' and request.form.get('uid'):
+            session['uid'] = request.form.get('uid')
+        elif action.lower() == 'logout':
+            session.pop('uid', None)
+    
+    return make_response(render_template('index.html', form=form, session=session), 200, headers)
 
 @app.route('/Techcrunch/<date>/<diff>', methods=['GET'])
 @app.route('/Techcrunch/<date>', methods=['GET','POST'])
@@ -56,21 +67,22 @@ def display_techcrunch_articles(date, diff=None):
         date = request.form.get('date')
         
         #validate required fields present
-        if title and action:
+        if title and action and ('uid' in session):
+            uid = session['uid']
             article = {'title': title, 'date': date}
             article_list = [item for item in article_list if item['title'].lower().strip() != title]
             if action == 'like':
-                article_manager.record_liked_article(user_id='rui', article=article)
+                article_manager.record_liked_article(user_id=uid, article=article)
             elif action == 'dislike':
-                article_manager.record_dislike_article(user_id='rui', article=article)
+                article_manager.record_dislike_article(user_id=uid, article=article)
             elif action == 'uncertain':
-                article_manager.record_uncertain_article(user_id='rui', article=article)
+                article_manager.record_uncertain_article(user_id=uid, article=article)
     else:
         article_list = article_manager.retrieve_articles(date)
 
     # add extra info if article has been labeled by user
-    uid = "rui"
-    if uid:
+    if 'uid' in session:
+        uid = session['uid']
         user_likes = set([article['title'] for article in article_manager.get_user_likes(uid)])
         user_dislikes = set([article['title'] for article in article_manager.get_user_dislikes(uid)])
         user_uncertains = set([article['title'] for article in article_manager.get_user_uncertains(uid)])
@@ -89,7 +101,8 @@ def display_techcrunch_articles(date, diff=None):
         render_template(
             'daily_news_summary.html',
             dateStr=date,
-            article_list=article_list
+            article_list=article_list,
+            session=session
             ), 
         200, headers)
 
@@ -113,22 +126,6 @@ def display_user_likes(uid, prefType):
                 uid=uid,
                 pref_type=prefType,
                 article_list=article_list
-                ), 
-            200, headers)
-
-@app.route('/UserDislikes/<uid>', methods=['GET','POST'])
-def display_user_dislikes(uid):
-    if not article_manager.has_user(uid):
-        return "No user [{}] found".format(uid)
-    else:
-        dislike_article_list = article_manager.get_user_dislikes(uid)
-        dislike_article_list.sort(key=lambda article: article['date'])
-        return make_response(
-            render_template(
-                'user_preference.html',
-                uid=uid,
-                pref_type="disliked",
-                article_list=dislike_article_list
                 ), 
             200, headers)
 
