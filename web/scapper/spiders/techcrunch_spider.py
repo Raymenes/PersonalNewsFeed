@@ -65,8 +65,8 @@ class TechCrunchSpider(scrapy.Spider):
     def parse_article(self, response):
 
         yield {
-            'title': "".join(response.xpath('//h1/text()').extract()),
-            'text': "".join(response.xpath('//div[starts-with(@class,"article-content")]/p//text()').extract()),
+            'title': " ".join(response.xpath('//h1/text()').extract()),
+            'text': " ".join(response.xpath('//div[starts-with(@class,"article-content")]/p//text()').extract()),
             'date': response.meta['date'].strftime("%Y/%m/%d"),
             'url' : response.url
         }
