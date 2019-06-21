@@ -382,15 +382,15 @@ class TCArticleManager:
 # shell command: https://dzone.com/articles/top-10-most-common-commands-for-beginners
 if __name__ == '__main__':
   article_manager = TCArticleManager()
-  dateObj = datetime.strptime('2018-01-01', "%Y-%m-%d")
-  todayObj = datetime.today()
+  startDate = datetime.strptime('2016-01-01', "%Y-%m-%d")
+  endDate = datetime.strptime('2018-01-01', "%Y-%m-%d")
 
   article_dict = {}
 
-  while dateObj <= todayObj:
-      dateStr = dateObj.strftime("%Y-%m-%d")
-      article_dict[dateStr] = article_manager.retrieve_articles(dateStr, full_content=True)
-      dateObj += timedelta(days=1)
+  while startDate <= endDate:
+      dateStr = startDate.strftime("%Y-%m-%d")
+      article_manager.retrieve_articles(dateStr)
+      startDate += timedelta(days=1)
 
   
   
