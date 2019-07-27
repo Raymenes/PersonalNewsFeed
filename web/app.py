@@ -4,7 +4,7 @@ from wtforms import StringField, SubmitField
 
 from pymongo import MongoClient
 from datetime import datetime, timedelta
-from article_manager import TCArticleCrawler, ArticleDB, TCArticleManager
+from article_manager import TCArticleManager
 
 import subprocess
 import json
@@ -44,6 +44,7 @@ def display_techcrunch_articles(date, diff=None):
         date = datetime.today().strftime("%Y-%m-%d")
         return redirect(url_for('display_techcrunch_articles', date=date, diff=diff))
     
+    # handle the case where diff is set, redirect to the actual date
     if diff:
         dateObj = datetime.strptime(date, "%Y-%m-%d")
         if diff.lower() == 'prev':
@@ -60,13 +61,16 @@ def display_techcrunch_articles(date, diff=None):
     
     article_list = []
 
+    # handle the user like/dislike event
     if request.method == 'POST':
         article_list = json.loads(request.form.get('article_list').replace("\'", "\""))
         title = request.form.get('title').lower().strip()
         action = request.form.get('action').lower().strip()
         date = request.form.get('date')
         
-        #validate required fields present
+        # validate required fields present
+        # action = like/dislike/uncertain
+        # uid = user id
         if title and action and ('uid' in session):
             uid = session['uid']
             article = {'title': title, 'date': date}
@@ -80,7 +84,7 @@ def display_techcrunch_articles(date, diff=None):
     else:
         article_list = article_manager.retrieve_articles(date)
 
-    # add extra info if article has been labeled by user
+    # render extra info if article has been labeled by user
     if 'uid' in session:
         uid = session['uid']
         user_likes = set([article['title'] for article in article_manager.get_user_likes(uid)])
@@ -108,26 +112,26 @@ def display_techcrunch_articles(date, diff=None):
 
 @app.route('/User/<uid>/<prefType>', methods=['GET','POST'])
 def display_user_likes(uid, prefType):
-    if not article_manager.has_user(uid):
-        return "No user [{}] found".format(uid)
-    else:
-        article_list = []
-        if prefType.lower() == 'like':
-            article_list = article_manager.get_user_likes(uid)
-        elif prefType.lower() == 'dislike':
-            article_list = article_manager.get_user_dislikes(uid)
-        elif prefType.lower() == 'uncertain':
-            article_list = article_manager.get_user_uncertains(uid)
+    article_list = []
+    if prefType.lower() == 'like':
+        article_list = article_manager.get_user_likes(uid)
+    elif prefType.lower() == 'dislike':
+        article_list = article_manager.get_user_dislikes(uid)
+    elif prefType.lower() == 'uncertain':
+        article_list = article_manager.get_user_uncertains(uid)
 
-        article_list.sort(key=lambda article: article['date'])
-        return make_response(
-            render_template(
-                'user_preference.html',
-                uid=uid,
-                pref_type=prefType,
-                article_list=article_list
-                ), 
-            200, headers)
+    print(article_list)
+
+    article_list.sort(key=lambda article: article['date'])
+    return make_response(
+        render_template(
+            'user_preference.html',
+            uid=uid,
+            pref_type=prefType,
+            article_list=article_list
+            ), 
+        200, headers)
+        
 
 
 

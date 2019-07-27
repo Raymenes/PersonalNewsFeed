@@ -3,6 +3,7 @@ import pymongo
 import subprocess
 import json
 import hashlib
+from aws_gateway import AWS_Pref_DB
 
 def getTitleHash(title):
   '''
@@ -100,117 +101,7 @@ class ArticleDB:
         if hashed_title in doc["articles"]:
           return doc["articles"][hashed_title]
 
-class ArticlePreferenceDB:
-  # Manage an datebase of user prefered article meta data
-  # schema: uid -> {'LIKE' -> article_dict, 'DISLIKE' -> article_dict}
-  # article_dict={key=hashed_title_string, value=article}
-  # article={'title':string, 'url':string, 'date'='yyyy/mm/dd'}
 
-  def __init__(self, collection):
-    '''
-    @param collection - a mongo db collection to store user article preference
-    '''
-    self.collection = collection
-
-
-  def has_user(self, user_id):
-    return self.collection.find({"uid": user_id}).count() != 0
-
-
-  def record_preference(self, user_id, liked_article, dislike_article, uncertain_article):
-    '''
-    Record user liked article
-    @param liked_article - {'title'=string, 'url'=string, 'date'='yyyy/mm/dd'}
-    '''
-    liked_articles = [liked_article] if liked_article else []
-    dislike_articles = [dislike_article] if dislike_article else []
-    uncertain_articles = [uncertain_article] if uncertain_article else []
-
-    self.record_preference_list(user_id, liked_articles, dislike_articles, uncertain_articles)
-
-
-  def record_preference_list(self, user_id, liked_articles, dislike_articles, uncertain_articles):
-    '''
-    Record user liked articles
-    @param liked_articles - a list of user liked articles
-    @param dislike_articles - a list of user disliked articles
-    article = {'title'=string, 'url'=string, 'date'='yyyy/mm/dd'}
-    '''
-    user_preferences = self.get_user_preferences(user_id)
-    like_article_dict = user_preferences['like'] if 'like' in user_preferences else {}
-    dislike_article_dict = user_preferences['dislike'] if 'dislike' in user_preferences else {}
-    uncertain_article_dict = user_preferences['uncertain'] if 'uncertain' in user_preferences else {}
-
-    #make sure user doesn't have the same article across different categories
-    all_articles = liked_articles + dislike_articles + uncertain_articles
-    all_hashed_titles = [getTitleHash(article['title']) for article in all_articles]
-
-    for key in all_hashed_titles:
-      if key in like_article_dict:
-        del like_article_dict[key]
-      elif key in dislike_article_dict:
-        del dislike_article_dict[key]
-      elif key in uncertain_article_dict:
-        del uncertain_article_dict[key]
-    
-    # store articles into correct entry
-    for article in liked_articles:
-      key = getTitleHash(article['title'])
-      like_article_dict[key] = article
-    for article in dislike_articles:
-      key = getTitleHash(article['title'])
-      dislike_article_dict[key] = article
-    for article in uncertain_articles:
-      uncertain_article_dict[key] = article
-    
-    self.collection.update_one(
-      {'uid': user_id}, 
-      {"$set": {'like': like_article_dict, 
-                'dislike': dislike_article_dict, 
-                'uncertain': uncertain_article_dict}}, 
-      upsert=True)
-
-
-  def get_user_preferences(self, user_id):
-    '''
-    Get user article preferences
-    @ user_id - user id
-    @ return - {'like': {}, 'dislike': {}}
-    '''
-    if not self.has_user(user_id):
-      return {}
-    else:
-      return self.collection.find_one({'uid': user_id})
-
-
-  def get_user_likes(self, user_id):
-    '''
-    Return a list of user liked articles
-    @param user_id - user id
-    @return - list of articles -> {'title': string, 'date': 'yyyy-mm-dd'}
-    '''
-    likes_dict = self.get_user_preferences(user_id)['like']
-    return [article for key, article in likes_dict.items()]
-
-
-  def get_user_dislikes(self, user_id):
-    '''
-    Return a list of user disliked articles
-    @param user_id - user id
-    @return - list of articles -> {'title': string, 'date': 'yyyy-mm-dd'}
-    '''
-    dislikes_dict = self.get_user_preferences(user_id)['dislike']
-    return [article for key, article in dislikes_dict.items()]
-
-
-  def get_user_uncertains(self, user_id):
-    '''
-    Return a list of user uncertain articles
-    @param user_id - user id
-    @return - list of articles -> {'title': string, 'date': 'yyyy-mm-dd'}
-    '''
-    uncertain_dict = self.get_user_preferences(user_id)['uncertain']
-    return [article for key, article in uncertain_dict.items()]
 
 class TCArticleCrawler:
   
@@ -260,12 +151,13 @@ class TCArticleManager:
   def __init__(self):
     self.mongoClient = pymongo.MongoClient("mongodb://localhost:27017/")
     self.article_db = ArticleDB(self.mongoClient["TC-Article"]["techcrunch"])
-    self.user_pref_db = ArticlePreferenceDB(self.mongoClient["UserData"]["preference"])
+    # self.user_pref_db = ArticlePreferenceDB(self.mongoClient["UserData"]["preference"])
+    self.user_pref_db = AWS_Pref_DB()
     self.article_crawler = TCArticleCrawler()
     return
 
 
-  def retrieve_articles(self, date, full_content=False, ):
+  def retrieve_articles(self, date, full_content=False):
     '''
     @function - retrieve articles published on date, 
                 load from database if entry exist, 
@@ -294,6 +186,40 @@ class TCArticleManager:
     return self.retrieve_articles(datetime.today().strftime('%Y-%m-%d'))
     
 
+  def get_full_article(self, title, date=None):
+    '''
+    Get full article data
+    @param title - article title
+    '''
+    return self.article_db.getArticleByTitle(title, date)
+
+
+  # User labeled article preferences related opeations
+
+  def get_user_likes(self, user_id):
+    '''
+    Get list of user liked articles
+    @param user_id - user id
+    '''
+    return self.user_pref_db.get_articles_by_preference(user_id, 'like')
+
+
+  def get_user_dislikes(self, user_id):
+    '''
+    Get list of user disliked articles
+    @param user_id - user id
+    '''
+    return self.user_pref_db.get_articles_by_preference(user_id, 'dislike')
+
+
+  def get_user_uncertains(self, user_id):
+    '''
+    Get list of user uncertain articles
+    @param user_id - user id
+    '''
+    return self.user_pref_db.get_articles_by_preference(user_id, 'uncertain')
+
+
   def record_liked_article(self, user_id, article):
     '''
     Store the user liked article in database
@@ -303,7 +229,8 @@ class TCArticleManager:
     '''
 
     print("user [{}] liked [{}]".format(user_id, article['title']))
-    self.user_pref_db.record_preference(user_id, liked_article=article, dislike_article=None, uncertain_article=None)
+    article['article_id'] = getTitleHash(article['title'])
+    self.user_pref_db.record_single_preference(user_id, article, 'like')
 
 
   def record_dislike_article(self, user_id, article):
@@ -314,7 +241,8 @@ class TCArticleManager:
     '''
 
     print("user [{}] disliked [{}]".format(user_id, article['title']))
-    self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=article, uncertain_article=None)
+    article['article_id'] = getTitleHash(article['title'])
+    self.user_pref_db.record_single_preference(user_id, article, 'dislike')
 
 
   def record_uncertain_article(self, user_id, article):
@@ -324,52 +252,9 @@ class TCArticleManager:
     @param article - {'title': string, 'date': 'yyyy-mm-dd'}
     '''
     print("user [{}] is uncertain about [{}]".format(user_id, article['title']))
-    self.user_pref_db.record_preference(user_id, liked_article=None, dislike_article=None, uncertain_article=article)
+    article['article_id'] = getTitleHash(article['title'])
+    self.user_pref_db.record_single_preference(user_id, article, 'uncertain')
 
-
-  def has_user(self, user_id):
-    return self.user_pref_db.has_user(user_id)
-
-
-  def get_full_article(self, title, date=None):
-    '''
-    Get full article data
-    @param title - article title
-    '''
-    return self.article_db.getArticleByTitle(title, date)
-
-
-  def get_user_likes(self, user_id):
-    '''
-    Get list of user liked articles
-    @param user_id - user id
-    '''
-    if self.user_pref_db.has_user(user_id):
-      return self.user_pref_db.get_user_likes(user_id)
-    else:
-      return []
-
-
-  def get_user_dislikes(self, user_id):
-    '''
-    Get list of user disliked articles
-    @param user_id - user id
-    '''
-    if self.user_pref_db.has_user(user_id):
-      return self.user_pref_db.get_user_dislikes(user_id)
-    else:
-      return []
-
-
-  def get_user_uncertains(self, user_id):
-    '''
-    Get list of user uncertain articles
-    @param user_id - user id
-    '''
-    if self.user_pref_db.has_user(user_id):
-      return self.user_pref_db.get_user_uncertains(user_id)
-    else:
-      return []
     
 
 ## this is for debugging
@@ -382,15 +267,25 @@ class TCArticleManager:
 # shell command: https://dzone.com/articles/top-10-most-common-commands-for-beginners
 if __name__ == '__main__':
   article_manager = TCArticleManager()
-  startDate = datetime.strptime('2016-01-01', "%Y-%m-%d")
-  endDate = datetime.strptime('2018-01-01', "%Y-%m-%d")
+  # startDate = datetime.strptime('2016-01-01', "%Y-%m-%d")
+  # endDate = datetime.strptime('2018-01-01', "%Y-%m-%d")
 
-  article_dict = {}
+  # article_dict = {}
 
-  while startDate <= endDate:
-      dateStr = startDate.strftime("%Y-%m-%d")
-      article_manager.retrieve_articles(dateStr)
-      startDate += timedelta(days=1)
+  # while startDate <= endDate:
+  #     dateStr = startDate.strftime("%Y-%m-%d")
+  #     article_manager.retrieve_articles(dateStr)
+  #     startDate += timedelta(days=1)
+  
+  articleDb = ArticleDB(pymongo.MongoClient("mongodb://localhost:27017/")["TC-Article"]["techcrunch"])
+  dynamoDbHelper_1 = AWS_Pref_DB('MyArticlePreferenceTable')
+  dynamoDbHelper_2 = AWS_Pref_DB('UserArticlePreferenceTable')
+
+  article_list = dynamoDbHelper_1.get_user_likes("ruizeng")
+  for article in article_list:
+    print(str(article))
+    dynamoDbHelper_2.put_article_preference("ruizeng", article, preference='like')
+
 
   
   
