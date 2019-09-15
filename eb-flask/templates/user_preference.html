@@ -2,16 +2,20 @@
 
 {% block content %}
 <div class="jumbotron">
-        <h1 class="display-4">Here is {{ uid }} {{ pref_type }} articles</h1>
+        <h1 class="display-4 text-center text-black-50">Here is {{ uid }} {{ pref_type }} articles</h1>
         <br>
 
         <!-- unordered list -->
         <div>
             {% for article in article_list %}
-            <div id="Article_{{ article['title'] }}""> 
-                <a href="{{ article['url'] }}" class="list-group-item list-group-item-primary" target="_blank" rel="noopener noreferrer">
-                    <span class="badge badge-pill badge-primary">{{article['date']}}</span>
-                    {{ article['title'] | capitalize }}
+            <div class="card text-white mb-3 mx-auto text-center" style="max-width: 50rem; background-color:#7986cb" id="Article_{{ article['title'] }}">
+                <!-- <div class="card-header">Header</div> -->
+                <a href="{{ article['url'] }}" target="_blank" rel="noopener noreferrer">
+                    <div class="card-body">
+                        <div class="badge badge-pill mb-3" style="background-color:#5c6bc0">{{article['date']}}</div>
+                        <h5 class="card-title white-text">{{ article['title'] | capitalize }}</h5>
+                        <!-- <p class="card-text text-white">Some quick example text to build on the panel title and make up the bulk of the panel's content.</p> -->
+                    </div>
                 </a>
             </div>
     

@@ -2,49 +2,58 @@
 
 {% block content %}
 <div class="jumbotron">
-    <h1 class="display-4">Here is {{ dateStr }} techcrunch article</h1>
+    <h1 class="display-4 text-center text-black-50">Here is {{ dateStr }} techcrunch article</h1>
     <br>
 
     <!-- Redriect bar to prev, next or random date article listing -->
-    <nav class="nav nav-pills nav-fill">
-        <a class="flex-sm-right text-sm-left nav-link active" href="/Techcrunch/{{dateStr}}/prev">Prev Date</a>
-        <a class="nav-item nav-link disabled" href="/Techcrunch/{{dateStr}}/rand" tabindex="-1" aria-disabled="true">Random</a>
-        <a class="flex-sm-left text-sm-right nav-link active" href="/Techcrunch/{{dateStr}}/next">Next Date</a>
-    </nav>
+    <div class="mx-auto nav nav-pills d-flex justify-content-between" style="max-width: 50rem;">
+        <a class="flex-sm-right text-sm-left nav-link active" href="/Techcrunch/{{dateStr}}/prev"
+        style="background-color:#7986cb">
+            Prev Date
+        </a>
+        <a class="nav-item nav-link" href="/Techcrunch/{{dateStr}}/rand" tabindex="-1" aria-disabled="true">Random</a>
+        <a class="flex-sm-left text-sm-right nav-link active" href="/Techcrunch/{{dateStr}}/next"
+        style="background-color:#7986cb">
+            Next Date
+        </a>
+    </div>
     <br>
 
     <!-- unordered list of articles -->
     <div>
         {% for article in article_list %}
-        <div id="Article_{{ article['title'] }}""> 
-            <a href={{ article['url'] }} class="list-group-item list-group-item-primary" target="_blank" rel="noopener noreferrer">
-                {{ article['title'] }}
-            </a>
+        <div class="card text-white mb-3 mx-auto" style="max-width: 50rem; background-color:#7986cb" id="Article_{{ article['title'] }}">
+            <!-- <div class="card-header">Header</div> -->
+            <div href={{ article['url'] }} class="card-body">
+                <h5 class="card-title text-center">{{ article['title'] }}</h5>
+                <!-- <p class="card-text text-white">Some quick example text to build on the panel title and make up the bulk of the panel's content.</p> -->
+            </div>
 
+            <!-- Display like/dislike button if user logged in -->
             {% if session['uid'] %}
-            <form method="POST" action="/Techcrunch/{{dateStr}}">
+            <form method="POST" action="/Techcrunch/{{dateStr}}" class="d-flex justify-content-center">
                 <input type="hidden" name="article_list" value="{{ article_list }}" />
                 <input type="hidden" name="date" value="{{ dateStr }}" />
                 <input type="hidden" name="title" value="{{ article['title'] }}"/>
                 <input type="hidden" name="label" value="{{ article['label'] }}"/>
 
                 {% if article['label'] == 'like' %}
-                <button type="button" class="btn btn-secondary" disabled>Like</button>
+                <button type="button" class="btn" disabled>Liked</button>
                 {% else %}
-                <input type="submit" name="action" value="Like" class="btn btn-success"/>
+                <input type="submit" name="action" value="Like" class="btn" style="background-color:#81c784"/>
                 {% endif %}
                 {% if article['label'] == 'dislike' %}
-                <button type="button" class="btn btn-secondary" disabled>Dislike</button>
+                <button type="button" class="btn" disabled>Disliked</button>
                 {% else %}
-                <input type="submit" name="action" value="Dislike" class="btn btn-danger"/>
+                <input type="submit" name="action" value="Dislike" class="btn" style="background-color:#e57373"/>
                 {% endif %}
                 {% if article['label'] == 'uncertain' %}
-                <button type="button" class="btn btn-secondary" disabled>Uncertain</button>
+                <button type="button" class="btn" disabled>Uncertained</button>
                 {% else %}
-                <input type="submit" name="action" value="Uncertain" class="btn btn-warning"/>
+                <input type="submit" name="action" value="Uncertain" class="btn" style="background-color:#ba68c8"/>
                 {% endif %}
             </form>      
-            {% endif %}          
+            {% endif %}  
         </div>
 
         <br>

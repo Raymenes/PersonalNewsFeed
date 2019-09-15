@@ -1,8 +1,10 @@
 .jquery-datepicker {
     position: relative;
+    text-align: center;
   }
   .jquery-datepicker__input {
     position: relative;
+    text-align: center;
   }
   .jquery-datepicker__input:focus {
     /* overwrite border style to avoid blinking on click */
@@ -78,7 +80,7 @@
     color: #fff;
   }
   .jquery-datepicker__panel .jquery-datepicker__day.-is--selected {
-    background-color: #005eb8;
+    background-color: #7986cb;
   }
   .jquery-datepicker__panel .jquery-datepicker__day.-is--selected span {
     color: #fff;

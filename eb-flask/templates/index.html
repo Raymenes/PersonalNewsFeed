@@ -2,34 +2,37 @@
 
 {% block content %}
 
-<div class="jumbotron">
-
+<div class="jumbotron text-center text-black-50">
+    {% if session['uid'] %}
+    <h1 class="display-4">Hello, {{session['uid']}}!</h1>
+    {% else %}
     <h1 class="display-4">Hello, world!</h1>
-    <p class="lead">This is Rui's project to create personal news feed.</p>
+    {% endif %}
+    <p class="lead">This is my project to create personalized news feed. Thanks for using!</p>
     <hr class="my-4">
     <p>work in progress ...</p>
 
       <br>
       <br>
-      <div class="card" style="width: 30rem;">
+      <div class="card mx-auto text-center" style="width: 30rem;">
         <div class="card-body">
 
-          <form class="form-inline" method="POST" action="/">
-            <h5 class="card-title">Get articles from specific date (yyyy-mm-dd):</h5>
-            <div class="md-form w-50 input-group">
-              <div class="jquery-datepicker">
+            <h5 class="card-title text-center">Get articles from specific date:</h5>
+            <form class="form-inline" method="POST" action="/">
+            
+            <div class="md-form w-50 input-group mx-auto">
+                <div class="jquery-datepicker">
                 <input type="text" name="date" class="form-control jquery-datepicker__input">
                 <input type="hidden" name="action" value="pickdate">
-                <button class="btn btn-primary" type="submit">Go</button>
-              </div>
+                <button class="btn white-text" type="submit" style="background-color:#7986cb">Go</button>
+                </div>
             </div>
-          </form>
-          
+            </form>
 
           <br>
 
           <h5 class="card-title">Or get today's techcrunch article</h5>
-          <a href="/Techcrunch/today" class="btn btn-primary">Get</a>
+          <a href="/Techcrunch/today" class="btn white-text" style="background-color:#7986cb">Get</a>
             
         </div>
       </div>

@@ -37,5 +37,8 @@ https://medium.com/@pbojinov/elastic-beanstalk-and-flask-c51e10de7fe0
 3. $sudo docker-compose up
 
 ## EB CLI
-- eb deploy (after making any change and saved the file, just this command would deploy the latest app version to eb env)
-- eb ssh
+1. $source virt/bin/activate  # activate python venv
+2. $pip freeze > requirements.txt 
+3. $eb init -p python-3.6 flask-tutorial --region us-east-2 # if creating eb app for the 1st time
+4. $eb deploy (after making any change and saved the file, just this command would deploy the latest app version to eb env)
+5. $eb init && eb ssh # to ssh into host

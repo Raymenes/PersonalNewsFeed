@@ -35,7 +35,7 @@
 </head>
 <body>
   <!--Navbar-->
-  <nav class="navbar navbar-expand-lg navbar-dark primary-color">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#7986cb">
     <!-- Navbar brand -->
     <a class="navbar-brand" href="/">Home</a>
   
@@ -64,10 +64,11 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
             aria-haspopup="true" aria-expanded="false">My Articles</a>
-          <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="/User/{{session['uid']}}/Like">Liked</a>
-            <a class="dropdown-item" href="/User/{{session['uid']}}/Dislike">Disliked</a>
-            <a class="dropdown-item" href="/User/{{session['uid']}}/Uncertain">Uncertains</a>
+          <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink"
+          style="background-color:#7986cb">
+            <a class="dropdown-item white-text border-0 w-100" href="/User/{{session['uid']}}/Like">Liked</a>
+            <a class="dropdown-item white-text border-0 w-100" href="/User/{{session['uid']}}/Dislike">Disliked</a>
+            <a class="dropdown-item white-text border-0 w-100" href="/User/{{session['uid']}}/Uncertain">Uncertains</a>
           </div>
         </li>
   
