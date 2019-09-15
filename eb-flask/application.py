@@ -12,6 +12,7 @@ import json
 from random import randint
 
 # https://stackoverflow.com/questions/14810795/flask-url-for-generating-http-url-instead-of-https
+# This sets correct redirect for https in elastic beanstalk
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
@@ -34,18 +35,8 @@ web_headers = {'Content-Type': 'text/html'}
 # Home page
 @application.route('/', methods=['GET','POST'])
 def hello_world():
-    # class CrawlTCForm(FlaskForm):
-    #     '''
-    #     simple form object to get date string from user
-    #     '''
-    #     date_field = StringField("Get articles from specific date (yyyy-mm-dd):")
-    #     submit_field = SubmitField("Submit")
-
-    # # Handle get today tc articles button
-    # form = CrawlTCForm()
-    # if form.validate_on_submit():
-    #     date = form.date_field.data
-    #     return redirect(url_for('display_techcrunch_articles', date=date))
+    # for debug
+    session['uid'] = 'ruizeng'
 
     # Handle simple user log out
     if request.method == 'POST' and request.form is not None:

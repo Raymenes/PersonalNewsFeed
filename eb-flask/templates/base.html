@@ -6,10 +6,10 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <title>Rui's News Feed</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script> -->
 
     <!-- Bootstrap core CSS -->
     <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
@@ -34,56 +34,77 @@
     <script type="text/javascript" src="{{url_for('static', filename='js/mdb.min.js')}}"></script>
 </head>
 <body>
-  
-  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-    <!-- Navbar content -->
+  <!--Navbar-->
+  <nav class="navbar navbar-expand-lg navbar-dark primary-color">
+    <!-- Navbar brand -->
     <a class="navbar-brand" href="/">Home</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+  
+    <!-- Collapse button -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
+      aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
+  
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+  
+      <!-- Links -->
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="/Techcrunch/today">Techcrunch-Today <span class="sr-only">(current)</span></a>
-        </li>
-        
-        {% if session['uid'] %}
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            My-Preference
+          <a class="nav-link" href="/Techcrunch/today">Techcrunch-Today
+            <span class="sr-only">(current)</span>
           </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/User/{{session['uid']}}/Like">Interested</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/User/{{session['uid']}}/Dislike">Not Interested</a>
-            <div class="dropdown-divider"></div>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" href="#">Features</a>
+        </li> -->
+  
+        {% if session['uid'] %}
+        <!-- Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">My Articles</a>
+          <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/User/{{session['uid']}}/Like">Liked</a>
+            <a class="dropdown-item" href="/User/{{session['uid']}}/Dislike">Disliked</a>
             <a class="dropdown-item" href="/User/{{session['uid']}}/Uncertain">Uncertains</a>
           </div>
         </li>
+  
         {% endif %}
+  
       </ul>
+      <!-- Links -->
 
       <form class="form-inline" method="POST" action="/">
         <div class="input-group">
           {% if session['uid'] %}
-          <a class="nav-link disabled" tabindex="-1" aria-disabled="true">{{session['uid']}}@</a>
+          <!-- display username and logout button -->
+          <span class="navbar-text white-text">
+              {{session['uid']}}@
+          </span>
           <input type="hidden" name="action" value="logout">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</button>
+          <button class="btn btn-outline-white btn-sm my-0" type="submit">Logout</button>    
           {% else %}
-          <!-- login -->
-          <div class="input-group-prepend">
-              <span class="input-group-text" id="basic-addon1">@</span>
-          </div>
-          
-          <a type="button" class="btn btn-outline-success my-2 my-sm-0" href="/UserLogin/login">Login</a>
-          <a type="button" class="btn btn-outline-info" href="/UserLogin/signup">SignUp</a>
+          <!-- display login button -->
+          <button type="button" class="btn btn-default btn-sm my-0" onclick="window.location.href='/UserLogin/login'">Login</button>
+          <button type="button" class="btn btn-primary btn-sm my-0" onclick="window.location.href='/UserLogin/signup'">SignUp</button>
           {% endif %}
         </div>
       </form>
-      
+
+      <!-- Search bar -->
+      <!-- <form class="form-inline">
+        <div class="md-form my-0">
+          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+        </div>
+      </form> -->
 
     </div>
+    <!-- Collapsible content -->
+  
   </nav>
+  <!--/.Navbar-->
 
   {% block content %}
   {% endblock %}
