@@ -1,2 +1,4 @@
 virt
-
+virt/
+.vscode
+__pycache__

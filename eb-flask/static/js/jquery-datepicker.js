@@ -38,7 +38,7 @@
             startDate: null,
             endDate: null,
             disabledDates: [],
-            format: 'ddmmyy',
+            format: 'yyyymmdd',
             position: 'below'   /* above or below the input field */
         },
 
@@ -245,7 +245,7 @@
                     dateStr = fullYear + '-' + month + '-' + day;
                     break;
                 case 'mmddyyyy':
-                    dateStr = month + '-' + day + '/' + fullYear;
+                    dateStr = month + '-' + day + '-' + fullYear;
                     break;
                 case 'ddmmyyyy':
                     dateStr = day + '-' + month + '-' + fullYear;
