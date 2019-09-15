@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- <form class="px-4 py-3" method="POST">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" name="uid" class="form-control" id="username">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" name="pin" class="form-control" id="password">
+    </div>
+
+    {% if type == 'login' %}
+    <input type="hidden" name="action" value="login">
+    <button type="submit" class="btn btn-primary">Log in</button>
+    {% else %}
+    <input type="hidden" name="action" value="signup">
+    <button type="submit" class="btn btn-primary">Sign up</button>
+    {% endif %}
+</form> -->
+<br>
+<br>
+<div class="card mx-auto text-center" style="width: 18rem;">
+  <br>
+  <img class="w-50 mx-auto" src="https://d2597oqac71veb.cloudfront.net/201406190823/images/cognito-icon.png" class="card-img-top" alt="...">
+  <div class="card-body">
+    <h5 class="card-title ">AWS Cognito</h5>
+    <p class="card-text">
+      Accounts managed by AWS Cognito with advanced security features, 
+      protecting users from unauthorized access and compromised credentials
+    </p>
+  </div>
+  <!-- <ul class="list-group list-group-flush">
+    <li class="card-link list-group-item" href="#">Login</li>
+    <li class="card-link list-group-item" href="#">Sign up</li>
+    <li class="card-link list-group-item" href="#">Forgot password?</li>
+  </ul>
+  <div class="card-body">
+    <a href="#" class="card-link">Card link</a>
+    <a href="#" class="card-link">Another link</a>
+  </div> -->
+  <div class="dropdown-divider"></div>
+  <a class="btn btn-outline-primary" href= {{ login_url }}>Login</a>
+  <a class="btn btn-outline-info" href={{ signup_url }}>New around here? Sign up</a>
+  <a class="btn btn-outline-secondary" href={{ reset_password_url }}>Forgot password?</a>
+
+</div>
+    
+{% endblock %}

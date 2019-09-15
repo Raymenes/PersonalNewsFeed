@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+        <h1 class="display-4">Here is {{ uid }} {{ pref_type }} articles</h1>
+        <br>
+
+        <!-- unordered list -->
+        <div>
+            {% for article in article_list %}
+            <div id="Article_{{ article['title'] }}""> 
+                <a href="{{ article['url'] }}" class="list-group-item list-group-item-primary" target="_blank" rel="noopener noreferrer">
+                    <span class="badge badge-pill badge-primary">{{article['date']}}</span>
+                    {{ article['title'] | capitalize }}
+                </a>
+            </div>
+    
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
