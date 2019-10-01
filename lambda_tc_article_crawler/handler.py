@@ -133,7 +133,9 @@ def lambda_handler(event, context):
         print("[info] finished scraping")
         br = '\n'
         complete_message = 'RuiZeng fetched {} articles from Techcrunch for date {}'.format(str(len(items)), dateStr)
-        complete_message = complete_message + br + br
+        complete_message += br
+        complete_message += "Visit https://www.ruizeng.info to express your preference!"
+        complete_message += br + br
         for idx, article in enumerate(items):
             title_str = "{}: {}".format(str(idx+1), article['title'])
             link_str = "  - link: {}".format(article['url']) 
