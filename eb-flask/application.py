@@ -35,9 +35,6 @@ web_headers = {'Content-Type': 'text/html'}
 # Home page
 @application.route('/', methods=['GET','POST'])
 def hello_world():
-    # for debug
-    session['uid'] = 'ruizeng'
-
     # Handle simple user log out
     if request.method == 'POST' and request.form is not None:
         action = request.form.get('action')

@@ -205,8 +205,10 @@ class AWS_Article_DB:
         '''
         response = self.table.query(KeyConditionExpression=Key('date').eq(date))
         if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+            print("Error retrieving articles from dynamodb for date = {}".format(date))
             return []
         if len(response['Items']) == 0:
+            print("Empty entry from dynamodb for date = {}".format(date))
             return []
         return [article for article in response['Items']]
 
