@@ -4,9 +4,9 @@ import boto3
 import json
 from datetime import datetime, timedelta
 
+client = boto3.client('lambda', region_name='us-east-1')
+
 def lambda_handler(event, context):
-    client = boto3.client('lambda', region_name='us-east-1')
-    
     # fetch yesterday's article 
     # as today's article might have not been published yet
     timestamp = str(datetime.now().timestamp())

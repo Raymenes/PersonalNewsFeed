@@ -30,7 +30,7 @@ sns = boto3.client('sns', region_name=region_name)
 s3 = boto3.resource('s3')
 db = boto3.resource('dynamodb', region_name=region_name)
 table = db.Table(article_dynamodb_table_name)
-
+lambda_client = boto3.client('lambda', region_name=region_name)
 
 def getTitleHash(title):
   '''
@@ -158,6 +158,7 @@ def lambda_handler(event, context):
         print("putting {} articles into s3".format(str(len(items))))
         for article in items:
             article_id = getTitleHash(article['title'])
+            article['article_id'] = article_id
             obj = s3.Object(article_s3_bucket_name, article_id + '.json')
             obj.put(Body=json.dumps(article))
 
@@ -165,11 +166,22 @@ def lambda_handler(event, context):
         print("putting " + str(len(items)) + " articles into dynamodb")
         with table.batch_writer() as batch:
           for article in items:
-            item = {'article_id': getTitleHash(article['title']), 
+            item = {'article_id': article['article_id'], 
                     'title': article['title'],
                     'date': article['date'],
                     'url': article['url']}
             batch.put_item(Item=item)
+
+        # Invoke the Article Analyzer Lambda (for Sentiment and Entities)
+        print("Invoking daily-article-analyzer lambda func with article_ids")
+        lambda_client.invoke(
+            FunctionName='daily-article-analyzer',
+            InvocationType='Event',
+            LogType='None',
+            Payload=json.dumps({
+                'article_ids': [article['article_id'] for article in items], 
+                'request_timestamp': 'timestamp'
+            }))
 
         return {
                 'statusCode': 200,
